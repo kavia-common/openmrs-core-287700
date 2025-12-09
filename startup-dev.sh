@@ -7,6 +7,10 @@
 #	Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS 
 #	graphic logo is a trademark of OpenMRS Inc.
 
+# Ensure this script is executable when invoked in CI/preview environments.
+# (Some environments may preserve mode; this is a no-op when already executable.)
+chmod +x "$(basename "$0")" || true
+
 [[ -z "${OMRS_BUILD_CMD:-}" ]] && OMRS_BUILD_CMD="mvn"
 [[ -z "${OMRS_BUILD_GOALS:-}" ]] && OMRS_BUILD_GOALS="install"
 [[ -z "${OMRS_BUILD_ARGS:-}" ]] && OMRS_BUILD_ARGS="-DskipTests -Pskip-all-checks"
@@ -18,4 +22,6 @@ if [ "${OMRS_BUILD}" == "true" ]; then
 	[[ -e /openmrs_core/webapp/target/openmrs.war ]] && cp /openmrs_core/webapp/target/openmrs.war /openmrs/distribution/openmrs_core/
 fi	
 
-source /openmrs/startup.sh
+# Use project-local startup script; preview system manages exposure of port 3001 externally.
+# Note: This script assumes a local dev environment without Docker image paths like /openmrs.
+source ./startup.sh

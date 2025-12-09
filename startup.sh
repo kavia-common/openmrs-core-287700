@@ -7,7 +7,18 @@
 #	Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS 
 #	graphic logo is a trademark of OpenMRS Inc.
 
-source /openmrs/startup-init.sh
+# Use project-relative path for init script to avoid Docker-specific absolute paths.
+if [ -f "./startup-init.sh" ]; then
+  source ./startup-init.sh
+else
+  # Fallback to legacy Docker path if present
+  [ -f "/openmrs/startup-init.sh" ] && source /openmrs/startup-init.sh
+fi
+
+# Fallback: if OMRS_DB_HOSTNAME is empty but OMRS_DB_HOST is provided, use it.
+if [ -z "${OMRS_DB_HOSTNAME:-}" ] && [ -n "${OMRS_DB_HOST:-}" ]; then
+  OMRS_DB_HOSTNAME="${OMRS_DB_HOST}"
+fi
 
 echo "Waiting for database to initialize..."
 
